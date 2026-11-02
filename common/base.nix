@@ -36,7 +36,7 @@ in
     # Keep an explicit unfree allowlist instead of allowing the entire package
     # set. Commented out while no unfree package is installed.
     # nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) allowedUnfreePkgs;
-    # Local packages from ../pkgs (pkgs.doublecmd-qt6, ...). Also visible to
+    # Own packages from ../pkgs. Also visible to
     # Home Manager because of home-manager.useGlobalPkgs.
     nixpkgs.overlays = [ (import ../pkgs) ];
     # nh: nicer rebuilds (`nh os switch`) and the weekly garbage collection
@@ -129,6 +129,21 @@ in
     networking.firewall.checkReversePath = "loose"; # needed for Tailscale exit nodes
     services.hardware.bolt.enable = true; # Thunderbolt
     services.udisks2.enable = true; # mounting drives (udiskie, file manager)
+
+    # --- snapshots: /home, hourly/daily/weekly/monthly ---
+    services.snapper.configs.home = {
+      SUBVOLUME = "/home";
+      ALLOW_USERS = [ vars.user ];
+      TIMELINE_CREATE = true;
+      TIMELINE_CLEANUP = true;
+      TIMELINE_LIMIT_HOURLY = 5;
+      TIMELINE_LIMIT_DAILY = 7;
+      TIMELINE_LIMIT_WEEKLY = 4;
+      TIMELINE_LIMIT_MONTHLY = 3;
+      TIMELINE_LIMIT_YEARLY = 0;
+    };
+    # "v" creates the btrfs snapshots subvolume if it does not exist yet
+    systemd.tmpfiles.rules = [ "v /home/.snapshots 0700 root root -" ];
 
     # --- desktop plumbing ---
     programs.dconf.enable = true;

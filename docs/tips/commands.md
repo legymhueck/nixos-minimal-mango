@@ -29,6 +29,13 @@ mnt /dev/sdb1                  # mount a USB partition (udisksctl)
 format-and-mount               # WIPE a drive, set it up as LUKS + Btrfs, mount it
 umount-drive                   # unmount ~/mount and close the "micleh" LUKS mapper
 partuuid                       # list partitions by PARTUUID
+```
+
+## Snapshots and Btrfs
+
+```sh
+snapper-delete --dry-run       # show which snapper snapshots would be deleted
+snapper-delete                 # delete them (asks per config; -y for no questions)
 bfree                          # Btrfs space usage
 bscrub && bscrubStatus         # check the file system for errors
 ```

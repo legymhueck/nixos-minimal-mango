@@ -104,7 +104,7 @@
         };
 
       # Local packages built with the system's package set (overlay), e.g.
-      # `nix build .#doublecmd-qt6`.
+      # `nix build .#<pkg>` — none at the moment, see pkgs/default.nix.
       packages.${system} =
         let
           systemPkgs = self.nixosConfigurations."${nixName}-eval".pkgs;

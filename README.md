@@ -6,13 +6,13 @@ Personal, reproducible NixOS workstation configuration: a minimal MangoWM deskto
 
 | Path | Purpose |
 | --- | --- |
-| `flake.nix`, `flake.lock` | Single entry point, all inputs pinned. `nixosConfigurations.nixbox` is an alias for `nixbox-mango`; both exist only where `nixos-mango/hardware-configuration.nix` exists (the `-eval` twin with a `/dev/null` stand-in is for CI and `nix eval`, never deploy). Also exports the local packages (`nix build .#doublecmd-qt6`), a dev shell with the linters (`nix develop`) and the formatter |
+| `flake.nix`, `flake.lock` | Single entry point, all inputs pinned. `nixosConfigurations.nixbox` is an alias for `nixbox-mango`; both exist only where `nixos-mango/hardware-configuration.nix` exists (the `-eval` twin with a `/dev/null` stand-in is for CI and `nix eval`, never deploy). Also exports the own packages (`nix build .#<pkg>`, none active — see `pkgs/`), a dev shell with the linters (`nix develop`) and the formatter |
 | `profile` | Written by the installer (`mango`); which configuration `nixbox` builds |
 | `common/` | `vars.nix` (user, host, Btrfs mounts), `base.nix` (system + essential CLI tools + unfree allowlist), `hardware-intel-laptop.nix` (Intel/ThinkPad specifics), `home.nix` (shell, git, starship, ...), `apps.nix` (the single spot for applications, free and unfree), `firefox.nix` (browser), `scripts.nix` |
 | `nixos-mango/` | MangoWM + Noctalia: `configuration.nix` (Mango system side), `desktop.nix` (Mango/Noctalia Home Manager), `home.nix`, `hardware-configuration.nix` |
 | `wallpapers/` | Noctalia wallpaper source (`desktop.nix` points to `~/nixos/wallpapers`); `minimal-dark.png` is self-generated, no license restrictions |
 | `dotfiles/` | Files that Home Manager links (doublecmd, mc, starship) |
-| `pkgs/` | One spot for own flake packages (`doublecmd-qt6` active; the rest commented out to reactivate later), added to `pkgs` by an overlay |
+| `pkgs/` | One spot for own flake packages (none active at the moment — entries for bibox, cornelsen, doublecmd, flaci, hylki, logseq, mtplayer, revpdf are kept commented out), added to `pkgs` by an overlay |
 | `scripts/` | Shell scripts, installed as commands by `common/scripts.nix` |
 | `install.sh` | Disk-wiping installer for the NixOS minimal ISO: installs everything (browser, applications, local packages) in one step |
 | `docs/tips/` | Handouts; `docs/tips/commands.md` is a cheat sheet of everyday commands |
@@ -34,7 +34,7 @@ The script copies the complete checkout (with `.git`) to `~/nixos`, so it is a w
 
 The script asks for **one password**. It becomes the LUKS passphrase and the password of `m`. Root login is disabled (use `sudo`).
 
-`doublecmd-qt6` is a local package and is compiled during the install (everything else comes from the binary caches; the Noctalia shell from its Cachix cache).
+Everything comes from the binary caches — the applications and system packages from cache.nixos.org, the Noctalia shell from its Cachix cache. Nothing is compiled during the install.
 
 ## Login
 

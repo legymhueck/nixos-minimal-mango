@@ -9,7 +9,7 @@ Minimal NixOS desktop (MangoWM + Noctalia) for one laptop (host `nixbox`, user `
 - `common/` = system + Home Manager base; `nixos-mango/` = desktop specifics.
 - One `pkgs` everywhere (`useGlobalPkgs`); the overlay for it lives in `common/base.nix`.
 - One spot for applications: free and unfree nixpkgs applications go into `common/apps.nix`; unfree ones also need a pname entry in the allowlist in `common/base.nix` (empty at the moment). The browser itself is `programs.firefox` in `common/firefox.nix`.
-- One spot for own flakes: `pkgs/default.nix` (`callPackage` style), currently only `doublecmd-qt6`; everything else is commented out to reactivate later.
+- One spot for own flakes: `pkgs/default.nix` (`callPackage` style) — no active entries at the moment; e.g. Double Commander instead comes from nixpkgs itself (`common/apps.nix`, the configuration in `dotfiles/`).
 - No install stages: the installer sets up everything in one run (`profile` = `mango`, written by install.sh).
 
 ## Invariants

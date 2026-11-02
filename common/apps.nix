@@ -23,7 +23,8 @@
     # --- free: Wayland helpers ---
     wl-clipboard
 
-    # --- free: file manager (local package from ../pkgs) ---
+    # --- free: file manager (nixpkgs build, cached; theme comes from
+    #     Noctalia via qt6ct, configuration in ../dotfiles/doublecmd) ---
     doublecmd-qt6
 
     # --- unfree applications (uncomment here AND in ./base.nix) ---

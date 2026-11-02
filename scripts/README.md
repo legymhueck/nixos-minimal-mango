@@ -9,5 +9,6 @@ commands and aliases).
 | Command | Purpose |
 | --- | --- |
 | `format-and-mount` | Format and mount an encrypted LUKS + Btrfs partition |
+| `snapper-delete` | Delete snapper snapshots interactively |
 | `ssh-permissions` | Reset permissions in `~/.ssh` (700/600/644) |
 | `update-check` | Show which flake inputs have newer upstream commits (read-only) |
