@@ -10,6 +10,7 @@ Personal, reproducible NixOS workstation configuration: a minimal MangoWM deskto
 | `profile` | Written by the installer (`mango`); which configuration `nixbox` builds |
 | `common/` | `vars.nix` (user, host, Btrfs mounts), `base.nix` (system + essential CLI tools + unfree allowlist), `hardware-intel-laptop.nix` (Intel/ThinkPad specifics), `home.nix` (shell, git, starship, ...), `apps.nix` (the single spot for applications, free and unfree), `firefox.nix` (browser), `scripts.nix` |
 | `nixos-mango/` | MangoWM + Noctalia: `configuration.nix` (Mango system side), `desktop.nix` (Mango/Noctalia Home Manager), `home.nix`, `hardware-configuration.nix` |
+| `wallpapers/` | Noctalia wallpaper source (`desktop.nix` points to `~/nixos/wallpapers`); `minimal-dark.png` is self-generated, no license restrictions |
 | `dotfiles/` | Files that Home Manager links (doublecmd, mc, starship) |
 | `pkgs/` | One spot for own flake packages (`doublecmd-qt6` active; the rest commented out to reactivate later), added to `pkgs` by an overlay |
 | `scripts/` | Shell scripts, installed as commands by `common/scripts.nix` |
