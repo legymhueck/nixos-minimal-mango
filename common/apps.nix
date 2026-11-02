@@ -13,6 +13,8 @@
     # --- free: command line essentials for the user profile ---
     bat
     btop
+    github-copilot-cli
+    github-copilot-app
     fd
     fzf
     p7zip
@@ -26,16 +28,10 @@
     # --- free: file manager (nixpkgs build, Qt5, cached; theme comes from
     #     Noctalia via qt5ct, configuration in ../dotfiles/doublecmd) ---
     doublecmd
+    megasync
     opencode
     opencode-desktop
     vscodium
     pwvucontrol
-    vscodium
-
-    # --- free: local packages from ../pkgs (sources are flake inputs) ---
-    hylki # email client, source: hyprlab/hylki
-
-    # --- unfree: also in the allowlist in ./base.nix ---
-    revpdf # PDF editor (AppImage wrapped by appimage-run), source: revpdf-release
   ];
 }
