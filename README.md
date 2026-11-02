@@ -9,7 +9,7 @@ Personal, reproducible NixOS workstation configuration: a minimal MangoWM deskto
 | `flake.nix`, `flake.lock` | Single entry point, all inputs pinned. `nixosConfigurations.nixbox` is an alias for `nixbox-mango`; both exist only where `nixos-mango/hardware-configuration.nix` exists (the `-eval` twin with a `/dev/null` stand-in is for CI and `nix eval`, never deploy). Also exports the own packages (`nix build .#<pkg>`, none active — see `pkgs/`), a dev shell with the linters (`nix develop`) and the formatter |
 | `profile` | Written by the installer (`mango`); which configuration `nixbox` builds |
 | `common/` | `vars.nix` (user, host, Btrfs mounts), `base.nix` (system + essential CLI tools + unfree allowlist), `hardware-intel-laptop.nix` (Intel/ThinkPad specifics), `home.nix` (shell, git, starship, ...), `apps.nix` (the single spot for applications, free and unfree), `firefox.nix` (browser), `scripts.nix` |
-| `nixos-mango/` | MangoWM + Noctalia: `configuration.nix` (Mango system side), `desktop.nix` (Mango/Noctalia Home Manager), `home.nix`, `hardware-configuration.nix` |
+| `nixos-mango/` | MangoWM + Noctalia: `configuration.nix` (Mango system side), `desktop.nix` (Mango/Noctalia Home Manager), `home.nix` (qt5ct/qt6ct theming, MIME defaults), `hardware-configuration.nix` |
 | `wallpapers/` | Noctalia wallpaper source (`desktop.nix` points to `~/nixos/wallpapers`); `minimal-dark.png` is self-generated, no license restrictions |
 | `dotfiles/` | Files that Home Manager links (doublecmd, mc, starship) |
 | `pkgs/` | One spot for own flake packages (none active at the moment — entries for bibox, cornelsen, doublecmd, flaci, hylki, logseq, mtplayer, revpdf are kept commented out), added to `pkgs` by an overlay |
@@ -68,6 +68,7 @@ Old generations are removed weekly (`programs.nh.clean`, keeps 5 and 14 days). C
 - A nixpkgs application (free or unfree) goes into `common/apps.nix` — the one spot for applications. Unfree ones additionally need their pname in the allowlist in `common/base.nix` (currently empty).
 - A own package goes to `pkgs/<name>/package.nix`, is registered in `pkgs/default.nix` and referenced from `common/apps.nix`; unfree: also allowlist.
 - A new user-facing command, alias or script: `docs/tips/commands.md`.
+- Qt apps inherit the Noctalia palette from the qt5ct/qt6ct setup in `nixos-mango/`. Double Commander from nixpkgs is Qt5, so it is themed through qt5ct even though `QT_QPA_PLATFORMTHEME` is set to `qt6ct`.
 
 ## Reproducibility
 

@@ -6,15 +6,29 @@
     ./desktop.nix
   ];
 
-  # qt6ct styles the Qt apps (Double Commander) with the theme Noctalia
-  # generates (templates for foot/gtk/qt are enabled in ./desktop.nix).
-  home.packages = with pkgs; [ qt6Packages.qt6ct ];
-  xdg.configFile."qt6ct/qt6ct.conf".text = ''
-    [Appearance]
-    color_scheme_path=${config.home.homeDirectory}/.config/qt6ct/colors/noctalia.conf
-    custom_palette=true
-    style=Fusion
-  '';
+  # Double Commander from nixpkgs is the Qt5 build, so it needs qt5ct; the
+  # Qt6 variant stays for future Qt6 apps. qt5ct's plugin also registers the
+  # "qt6ct" key, so one QT_QPA_PLATFORMTHEME (set in ./configuration.nix)
+  # covers both. The Noctalia Qt template writes both color files (enabled in
+  # ./desktop.nix).
+  home.packages = with pkgs; [
+    libsForQt5.qt5ct
+    qt6Packages.qt6ct
+  ];
+  xdg.configFile = {
+    "qt5ct/qt5ct.conf".text = ''
+      [Appearance]
+      color_scheme_path=${config.home.homeDirectory}/.config/qt5ct/colors/noctalia.conf
+      custom_palette=true
+      style=Fusion
+    '';
+    "qt6ct/qt6ct.conf".text = ''
+      [Appearance]
+      color_scheme_path=${config.home.homeDirectory}/.config/qt6ct/colors/noctalia.conf
+      custom_palette=true
+      style=Fusion
+    '';
+  };
 
   xdg.mimeApps = {
     enable = true;

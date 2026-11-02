@@ -10,6 +10,7 @@ Minimal NixOS desktop (MangoWM + Noctalia) for one laptop (host `nixbox`, user `
 - One `pkgs` everywhere (`useGlobalPkgs`); the overlay for it lives in `common/base.nix`.
 - One spot for applications: free and unfree nixpkgs applications go into `common/apps.nix`; unfree ones also need a pname entry in the allowlist in `common/base.nix` (empty at the moment). The browser itself is `programs.firefox` in `common/firefox.nix`.
 - One spot for own flakes: `pkgs/default.nix` (`callPackage` style) — no active entries at the moment; e.g. Double Commander instead comes from nixpkgs itself (`common/apps.nix`, the configuration in `dotfiles/`).
+- Theming: Noctalia generates the GTK/Qt files (`theme.templates` in `nixos-mango/desktop.nix`). `nixos-mango/home.nix` points both qt5ct and qt6ct at the generated `colors/noctalia.conf`; `QT_QPA_PLATFORMTHEME=qt6ct` (`nixos-mango/configuration.nix`) covers both toolkits because qt5ct's plugin also registers the `qt6ct` key. Double Commander from nixpkgs is the **Qt5** build, so it needs qt5ct — installing only qt6ct leaves it on the default light palette.
 - No install stages: the installer sets up everything in one run (`profile` = `mango`, written by install.sh).
 
 ## Invariants
