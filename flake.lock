@@ -60,22 +60,6 @@
         "type": "github"
       }
     },
-    "hylki-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1793406059,
-        "narHash": "sha256-AUO99F7ND5A5yl8HEA5/xEC0zpn6eE5Nc0S8BrLuP0M=",
-        "owner": "hyprlab",
-        "repo": "hylki",
-        "rev": "5fc0b5fc9e71cba2f5443d36b35a49af0852375c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hyprlab",
-        "repo": "hylki",
-        "type": "github"
-      }
-    },
     "mango": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -192,33 +176,14 @@
         "type": "github"
       }
     },
-    "revpdf-release": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1784272400,
-        "narHash": "sha256-P9aTucNZFBipYXtQsEMfzjijlg2yjkOJGwemr4LDofY=",
-        "owner": "Pawandeep-prog",
-        "repo": "revpdf-release",
-        "rev": "dd72f556be18d7a87b301a82ee33397aeb2ced32",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Pawandeep-prog",
-        "repo": "revpdf-release",
-        "rev": "dd72f556be18d7a87b301a82ee33397aeb2ced32",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "home-manager": "home-manager",
-        "hylki-src": "hylki-src",
         "mango": "mango",
         "nixpkgs": "nixpkgs",
         "noctalia": "noctalia",
         "noctalia_community_plugins": "noctalia_community_plugins",
-        "noctalia_official_plugins": "noctalia_official_plugins",
-        "revpdf-release": "revpdf-release"
+        "noctalia_official_plugins": "noctalia_official_plugins"
       }
     },
     "scenefx": {

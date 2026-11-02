@@ -64,7 +64,9 @@
       profile = readFileOr ./profile "mango";
 
       mkSystem =
-        { evalOnly ? false }:
+        {
+          evalOnly ? false,
+        }:
         lib.nixosSystem {
           inherit system;
           specialArgs = { inherit inputs vars; };
@@ -84,8 +86,17 @@
           ];
         };
 
-      # Names of the local packages from ./pkgs (the overlay is not evaluated).
-      localPackages = builtins.attrNames ((import ./pkgs) { });
+      # Names of the local packages from ./pkgs. The overlay itself is not
+      # evaluated here: the system package set gets it via `nixpkgs.overlays`
+      # (common/base.nix); only the attribute names of its result are forced,
+      # the entry values stay thunks. Dummy arguments make this work with the
+      # dormant `_final: _prev:` shape and a reactivated
+      # `{ inputs }: final: _prev:` (see pkgs/default.nix).
+      localPackages =
+        let
+          applyArgs = f: if builtins.isFunction f then applyArgs (f null) else f;
+        in
+        builtins.attrNames (applyArgs (import ./pkgs));
     in
     {
       formatter.${system} = pkgs.nixfmt-tree;
@@ -95,7 +106,7 @@
         # module is present (the committed one belongs to the current machine).
         (lib.optionalAttrs hasHardware { ${nixName} = mkSystem { }; })
         # Evaluation-only twin for CI and `nix eval`; never deploy this.
-        {
+        // {
           "${nixName}-eval" = mkSystem { evalOnly = true; };
         }
         # `nixos-rebuild --flake .` / `nh os switch` look up the hostname.

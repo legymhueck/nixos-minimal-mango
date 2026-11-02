@@ -8,7 +8,7 @@
 
   # qt6ct styles the Qt apps (Double Commander) with the theme Noctalia
   # generates (templates for foot/gtk/qt are enabled in ./desktop.nix).
-  home.packages = with pkgs; [ qt6ct ];
+  home.packages = with pkgs; [ qt6Packages.qt6ct ];
   xdg.configFile."qt6ct/qt6ct.conf".text = ''
     [Appearance]
     color_scheme_path=${config.home.homeDirectory}/.config/qt6ct/colors/noctalia.conf

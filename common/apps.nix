@@ -23,9 +23,9 @@
     # --- free: Wayland helpers ---
     wl-clipboard
 
-    # --- free: file manager (nixpkgs build, cached; theme comes from
+    # --- free: file manager (nixpkgs build (qt6), cached; theme comes from
     #     Noctalia via qt6ct, configuration in ../dotfiles/doublecmd) ---
-    doublecmd-qt6
+    doublecmd
 
     # --- unfree applications (uncomment here AND in ./base.nix) ---
     # obsidian
