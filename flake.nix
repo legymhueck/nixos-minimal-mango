@@ -21,9 +21,16 @@
       url = "github:noctalia-dev/community-plugins";
       flake = false;
     };
-    # No local package sources here at the moment: all but one entry in
-    # ./pkgs/default.nix is commented out. Reactivating hylki or revpdf needs
-    # the inputs hylki-src / revpdf-release back here first.
+    # Sources for the active local packages in ./pkgs/default.nix. Neither is
+    # a flake, they are only used as `src` (build sources).
+    hylki-src = {
+      url = "github:hyprlab/hylki";
+      flake = false;
+    };
+    revpdf-release = {
+      url = "github:Pawandeep-prog/revpdf-release";
+      flake = false;
+    };
   };
 
   outputs =
@@ -90,11 +97,14 @@
       # evaluated here: the system package set gets it via `nixpkgs.overlays`
       # (common/base.nix); only the attribute names of its result are forced,
       # the entry values stay thunks. Dummy arguments make this work with the
-      # dormant `_final: _prev:` shape and a reactivated
-      # `{ inputs }: final: _prev:` (see pkgs/default.nix).
+      # `{ inputs }: final: _prev:` shape in pkgs/default.nix: the outer
+      # attribute set accepts `inputs`, the two overlay levels accept anything.
       localPackages =
         let
-          applyArgs = f: if builtins.isFunction f then applyArgs (f null) else f;
+          dummy = {
+            inputs = null;
+          };
+          applyArgs = f: if builtins.isFunction f then applyArgs (f dummy) else f;
         in
         builtins.attrNames (applyArgs (import ./pkgs));
     in

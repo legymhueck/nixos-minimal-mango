@@ -279,7 +279,7 @@ in
         "SUPER+SHIFT,s,spawn,noctalia msg settings-toggle"
         "SUPER,comma,spawn,noctalia msg settings-toggle"
         "SUPER,Return,spawn,foot"
-        "SUPER,e,spawn,doublecmd"
+        "SUPER+SHIFT,Return,spawn,doublecmd"
         "SUPER,w,spawn,firefox"
         "SUPER,q,killclient,"
         "SUPER+CTRL,q,quit"

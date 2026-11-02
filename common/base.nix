@@ -6,16 +6,13 @@
   ...
 }:
 let
-  # Unfree applications: no active entries at the moment. When an unfree
-  # application from nixpkgs is added (to common/apps.nix), enable the
-  # predicate again and list its pname here. Names are as returned by
-  # lib.getName (the pname); VS Code extensions are named
-  # "vscode-extension-<publisher>-<name>" with the publisher spelled as in the
-  # marketplace.
-  allowedUnfreePkgs = [ ];
-  # allowedUnfreePkgs = [
-  #   "obsidian"
-  # ];
+  # Unfree applications: list the pname of every unfree package installed
+  # from common/apps.nix. Names are as returned by lib.getName (the pname);
+  # VS Code extensions are named "vscode-extension-<publisher>-<name>" with
+  # the publisher spelled as in the marketplace.
+  allowedUnfreePkgs = [
+    "revpdf" # local package from ../pkgs (AppImage, see common/apps.nix)
+  ];
 in
 {
   # Base system (UEFI, LUKS2 + Btrfs). Machine-specific parts are in
@@ -34,11 +31,11 @@ in
     nix.nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
     nix.optimise.automatic = true; # dedupe the store
     # Keep an explicit unfree allowlist instead of allowing the entire package
-    # set. Commented out while no unfree package is installed.
-    # nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) allowedUnfreePkgs;
-    # Own packages from ../pkgs. Also visible to
-    # Home Manager because of home-manager.useGlobalPkgs.
-    nixpkgs.overlays = [ (import ../pkgs) ];
+    # set (see allowedUnfreePkgs above).
+    nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) allowedUnfreePkgs;
+    # Own packages from ../pkgs; `inputs` supplies the sources of hylki and
+    # revpdf. Also visible to Home Manager because of home-manager.useGlobalPkgs.
+    nixpkgs.overlays = [ (import ../pkgs { inherit inputs; }) ];
     # nh: nicer rebuilds (`nh os switch`) and the weekly garbage collection
     # (replaces nix.gc, they must not both be enabled).
     programs.nh = {

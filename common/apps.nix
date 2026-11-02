@@ -7,7 +7,7 @@
   # tools in ./base.nix; desktop plumbing for Mango is in nixos-mango/.)
   #
   # Unfree applications go into the last block and also need a pname entry in
-  # the allowlist in ./base.nix (see there). None are installed at the moment.
+  # the allowlist in ./base.nix (see there).
 
   home.packages = with pkgs; [
     # --- free: command line essentials for the user profile ---
@@ -29,5 +29,12 @@
     opencode
     opencode-desktop
     pwvucontrol
+    vscodium
+
+    # --- free: local packages from ../pkgs (sources are flake inputs) ---
+    hylki # email client, source: hyprlab/hylki
+
+    # --- unfree: also in the allowlist in ./base.nix ---
+    revpdf # PDF editor (AppImage wrapped by appimage-run), source: revpdf-release
   ];
 }

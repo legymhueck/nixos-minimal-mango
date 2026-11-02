@@ -6,13 +6,13 @@ Personal, reproducible NixOS workstation configuration: a minimal MangoWM deskto
 
 | Path | Purpose |
 | --- | --- |
-| `flake.nix`, `flake.lock` | Single entry point, all inputs pinned. `nixosConfigurations.nixbox` is an alias for `nixbox-mango`; both exist only where `nixos-mango/hardware-configuration.nix` exists (the `-eval` twin with a `/dev/null` stand-in is for CI and `nix eval`, never deploy). Also exports the own packages (`nix build .#<pkg>`, none active — see `pkgs/`), a dev shell with the linters (`nix develop`) and the formatter |
+| `flake.nix`, `flake.lock` | Single entry point, all inputs pinned. `nixosConfigurations.nixbox` is an alias for `nixbox-mango`; both exist only where `nixos-mango/hardware-configuration.nix` exists (the `-eval` twin with a `/dev/null` stand-in is for CI and `nix eval`, never deploy). Also exports the own packages (`nix build .#hylki`, `nix build .#revpdf`), a dev shell with the linters (`nix develop`) and the formatter |
 | `profile` | Written by the installer (`mango`); which configuration `nixbox` builds |
 | `common/` | `vars.nix` (user, host, Btrfs mounts), `base.nix` (system + essential CLI tools + unfree allowlist), `hardware-intel-laptop.nix` (Intel/ThinkPad specifics), `home.nix` (shell, git, starship, ...), `apps.nix` (the single spot for applications, free and unfree), `firefox.nix` (browser), `scripts.nix` |
 | `nixos-mango/` | MangoWM + Noctalia: `configuration.nix` (Mango system side), `desktop.nix` (Mango/Noctalia Home Manager), `home.nix` (qt5ct/qt6ct theming, MIME defaults), `hardware-configuration.nix` |
 | `wallpapers/` | Noctalia wallpaper source (`desktop.nix` points to `~/nixos/wallpapers`); `minimal-dark.png` is self-generated, no license restrictions |
 | `dotfiles/` | Files that Home Manager links (doublecmd, mc, starship) |
-| `pkgs/` | One spot for own flake packages (none active at the moment — entries for bibox, cornelsen, doublecmd, flaci, hylki, logseq, mtplayer, revpdf are kept commented out), added to `pkgs` by an overlay |
+| `pkgs/` | One spot for own flake packages (`hylki`, `revpdf` are active; entries for bibox, cornelsen, doublecmd, flaci, logseq, mtplayer are kept commented out), added to `pkgs` by an overlay |
 | `scripts/` | Shell scripts, installed as commands by `common/scripts.nix` |
 | `install.sh` | Disk-wiping installer for the NixOS minimal ISO: installs everything (browser, applications, local packages) in one step |
 | `docs/tips/` | Handouts; `docs/tips/commands.md` is a cheat sheet of everyday commands |
@@ -79,7 +79,7 @@ Old generations are removed weekly (`programs.nh.clean`, keeps 5 and 14 days). C
 ## Notes
 
 - Starting a fresh repo from these files (new `.git`): `git init && git add -A && git commit -m "Initial import"`. Flakes read working-tree files through git, so the files must be tracked before `nix flake check` / `nh os switch` work.
-- `flake.lock` may contain entries for inputs no longer in `flake.nix` (hylki-src, revpdf-release were removed); they are ignored and pruned on the next `nix flake update`.
+- `flake.lock` may contain entries for inputs no longer in `flake.nix` (e.g. after removing a local package); they are ignored and pruned on the next `nix flake update`.
 - `nixos-mango/hardware-configuration.nix` in the repo belongs to the current machine; the installer replaces it for a new one. Never deploy without the generated module of the target.
 - Do not change `system.stateVersion` / `home.stateVersion` during routine updates.
 - More detail: `AGENTS.md`.
