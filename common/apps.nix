@@ -28,6 +28,7 @@
     doublecmd
     opencode
     opencode-desktop
+    vscodium
     pwvucontrol
     vscodium
 
