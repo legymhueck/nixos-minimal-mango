@@ -14,7 +14,6 @@ let
   allowedUnfreePkgs = [
     "claude-code"
     "github-copilot-cli"
-    "revpdf" # local package from ../pkgs (AppImage, see common/apps.nix)
     "vscode-extension-anthropic-claude-code"
   ];
 in
@@ -37,9 +36,9 @@ in
     # Keep an explicit unfree allowlist instead of allowing the entire package
     # set (see allowedUnfreePkgs above).
     nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) allowedUnfreePkgs;
-    # Own packages from ../pkgs; `inputs` supplies the sources of hylki and
-    # revpdf. Also visible to Home Manager because of home-manager.useGlobalPkgs.
-    nixpkgs.overlays = [ (import ../pkgs { inherit inputs; }) ];
+    # Own packages from ../pkgs (none active). Also visible to Home Manager
+    # because of home-manager.useGlobalPkgs.
+    nixpkgs.overlays = [ (import ../pkgs) ];
     # nh: nicer rebuilds (`nh os switch`) and the weekly garbage collection
     # (replaces nix.gc, they must not both be enabled).
     programs.nh = {

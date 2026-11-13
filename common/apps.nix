@@ -28,9 +28,7 @@
     doublecmd
 
     # --- desktop applications ---
-    megasync
-    opencode-desktop
-    pwvucontrol
+    pwvucontrol # audio devices and levels (headsets on foreign PCs)
     # Second browser, only for the Claude browser agent (Claude in Chrome
     # needs a Chromium engine; it does not run in Firefox). No Web Store:
     # install the extension by hand. Firefox stays the default.
@@ -39,7 +37,6 @@
     # --- coding agents (claude-code and github-copilot-cli are unfree) ---
     claude-code
     github-copilot-cli
-    github-copilot-app
     opencode
     nodejs # npx for MCP servers the agents start
 

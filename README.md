@@ -6,13 +6,13 @@ Personal, reproducible NixOS workstation configuration: a minimal MangoWM deskto
 
 | Path | Purpose |
 | --- | --- |
-| `flake.nix`, `flake.lock` | Single entry point, all inputs pinned. `nixosConfigurations.nixbox` is an alias for `nixbox-mango`; both exist only where `nixos-mango/hardware-configuration.nix` exists (the `-eval` twin with a `/dev/null` stand-in is for CI and `nix eval`, never deploy). Also exports the own packages (`nix build .#hylki`, `nix build .#revpdf`), a dev shell with the linters (`nix develop`) and the formatter |
+| `flake.nix`, `flake.lock` | Single entry point, all inputs pinned. `nixosConfigurations.nixbox` is an alias for `nixbox-mango`; both exist only where `nixos-mango/hardware-configuration.nix` exists (the `-eval` twin with a `/dev/null` stand-in is for CI and `nix eval`, never deploy). Also exports the own packages (`nix build .#<pkg>`, none active — see `pkgs/`), a dev shell with the linters (`nix develop`) and the formatter |
 | `profile` | Written by the installer (`mango`); which configuration `nixbox` builds |
 | `common/` | `vars.nix` (user, host, Btrfs mounts), `base.nix` (system + essential CLI tools + unfree allowlist), `hardware-portable.nix` (generic Intel/AMD support so the stick boots on any x86 PC), `home.nix` (shell, git, starship, ...), `apps.nix` (the single spot for applications, free and unfree), `firefox.nix` (browser), `scripts.nix` |
 | `nixos-mango/` | MangoWM + Noctalia: `configuration.nix` (Mango system side), `desktop.nix` (Mango/Noctalia Home Manager), `home.nix` (qt5ct/qt6ct theming, MIME defaults), `hardware-configuration.nix` |
 | `wallpapers/` | Noctalia wallpaper source (`desktop.nix` points to `~/nixos/wallpapers`); `minimal-dark.png` is self-generated, no license restrictions |
 | `dotfiles/` | Files that Home Manager links (doublecmd, mc, starship) |
-| `pkgs/` | One spot for own flake packages (`hylki`, `revpdf` are active; entries for bibox, cornelsen, doublecmd, flaci, logseq, mtplayer are kept commented out), added to `pkgs` by an overlay |
+| `pkgs/` | One spot for own flake packages (none active — entries for bibox, cornelsen, doublecmd, flaci, hylki, logseq, mtplayer, revpdf are kept commented out), added to `pkgs` by an overlay |
 | `scripts/` | Shell scripts, installed as commands by `common/scripts.nix` |
 | `install.sh` | Disk-wiping installer for the NixOS minimal ISO: installs everything (browser, applications, local packages) in one step |
 | `docs/tips/` | Handouts; `docs/tips/commands.md` is a cheat sheet of everyday commands |
@@ -36,7 +36,7 @@ The script copies the complete checkout (with `.git`) to `~/nixos`, so it is a w
 
 The script asks for **one password**. It becomes the LUKS passphrase and the password of `m`. Root login is disabled (use `sudo`).
 
-Almost everything comes from the binary caches — the free applications and system packages from cache.nixos.org, the Noctalia shell from its Cachix cache. The unfree packages (`claude-code`, `github-copilot-cli`, the Claude VSCodium extension, `revpdf`) are not on cache.nixos.org; Nix packages them locally from the upstream release files during the install.
+Almost everything comes from the binary caches — the free applications and system packages from cache.nixos.org, the Noctalia shell from its Cachix cache. The unfree packages (`claude-code`, `github-copilot-cli`, the Claude VSCodium extension) are not on cache.nixos.org; Nix packages them locally from the upstream release files during the install (download and wrap, no compiling). The Mango compositor itself is built from its flake input (a small C build, about a minute). Keep it that way: nothing that compiles for long belongs on the stick — check with `nix build --dry-run .#nixosConfigurations.nixbox-mango-eval.config.system.build.toplevel` ("will be built" vs. "will be fetched").
 
 ## Login
 

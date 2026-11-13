@@ -21,16 +21,9 @@
       url = "github:noctalia-dev/community-plugins";
       flake = false;
     };
-    # Sources for the active local packages in ./pkgs/default.nix. Neither is
-    # a flake, they are only used as `src` (build sources).
-    hylki-src = {
-      url = "github:hyprlab/hylki";
-      flake = false;
-    };
-    revpdf-release = {
-      url = "github:Pawandeep-prog/revpdf-release";
-      flake = false;
-    };
+    # No local package sources here: every entry in ./pkgs/default.nix is
+    # commented out (slim USB system, binary cache only). Reactivating hylki
+    # or revpdf needs the inputs hylki-src / revpdf-release back here first.
   };
 
   outputs =
