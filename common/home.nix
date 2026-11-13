@@ -137,6 +137,13 @@
       pull.rebase = true;
     };
   };
+  # direnv + nix-direnv: a project's `.envrc` (`use flake`) loads its dev shell
+  # on `cd`, so the agents find the repo's tools (e.g. `nix develop` in ~/nixos).
+  programs.direnv = {
+    enable = true;
+    nix-direnv.enable = true;
+  };
+
   # GitHub login via `gh auth login`; also installs the git credential helper.
   programs.gh = {
     enable = true;

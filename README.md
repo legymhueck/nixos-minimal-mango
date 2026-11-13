@@ -8,7 +8,7 @@ Personal, reproducible NixOS workstation configuration: a minimal MangoWM deskto
 | --- | --- |
 | `flake.nix`, `flake.lock` | Single entry point, all inputs pinned. `nixosConfigurations.nixbox` is an alias for `nixbox-mango`; both exist only where `nixos-mango/hardware-configuration.nix` exists (the `-eval` twin with a `/dev/null` stand-in is for CI and `nix eval`, never deploy). Also exports the own packages (`nix build .#hylki`, `nix build .#revpdf`), a dev shell with the linters (`nix develop`) and the formatter |
 | `profile` | Written by the installer (`mango`); which configuration `nixbox` builds |
-| `common/` | `vars.nix` (user, host, Btrfs mounts), `base.nix` (system + essential CLI tools + unfree allowlist), `hardware-intel-laptop.nix` (Intel/ThinkPad specifics), `home.nix` (shell, git, starship, ...), `apps.nix` (the single spot for applications, free and unfree), `firefox.nix` (browser), `scripts.nix` |
+| `common/` | `vars.nix` (user, host, Btrfs mounts), `base.nix` (system + essential CLI tools + unfree allowlist), `hardware-portable.nix` (generic Intel/AMD support so the stick boots on any x86 PC), `home.nix` (shell, git, starship, ...), `apps.nix` (the single spot for applications, free and unfree), `firefox.nix` (browser), `scripts.nix` |
 | `nixos-mango/` | MangoWM + Noctalia: `configuration.nix` (Mango system side), `desktop.nix` (Mango/Noctalia Home Manager), `home.nix` (qt5ct/qt6ct theming, MIME defaults), `hardware-configuration.nix` |
 | `wallpapers/` | Noctalia wallpaper source (`desktop.nix` points to `~/nixos/wallpapers`); `minimal-dark.png` is self-generated, no license restrictions |
 | `dotfiles/` | Files that Home Manager links (doublecmd, mc, starship) |
@@ -26,15 +26,17 @@ Boot the NixOS minimal ISO (UEFI), connect to the network (`nmtui`), then:
 git clone <your-repo-url> nixos
 cd nixos
 lsblk                                 # identify the target disk
-sudo ./install.sh /dev/nvme0n1        # MangoWM + Noctalia
+sudo ./install.sh /dev/sdb            # the target USB stick (MangoWM + Noctalia)
 reboot
 ```
+
+The system is meant to live on a fast USB stick (USB 3, 64 GB or more) or a USB SSD and boots on any x86_64 UEFI PC, Intel or AMD. It never writes boot entries into a PC's firmware (`canTouchEfiVariables = false`); the firmware finds it through the removable-media path `EFI/BOOT/BOOTX64.EFI`, so pick the stick in the boot menu (Secure Boot off; see `docs/tips/after-install.md` for everything to do after the install). To spare the flash, the journal and `/tmp` live in RAM (logs are gone after a reboot), there are no snapper snapshots and no automatic store optimisation.
 
 The script copies the complete checkout (with `.git`) to `~/nixos`, so it is a working clone afterwards (set the remote or keep it local). It **erases the whole disk** after you type `YES`, and refuses disks with mounted partitions (the installer stick). It creates GPT/EFI, LUKS2 and Btrfs subvolumes (`@`, `@home`, `@nix`, `@log`, zstd) and installs. A temporary swap file is used only during the install and deleted at the end; the installed system uses zram.
 
 The script asks for **one password**. It becomes the LUKS passphrase and the password of `m`. Root login is disabled (use `sudo`).
 
-Everything comes from the binary caches — the applications and system packages from cache.nixos.org, the Noctalia shell from its Cachix cache. Nothing is compiled during the install.
+Almost everything comes from the binary caches — the free applications and system packages from cache.nixos.org, the Noctalia shell from its Cachix cache. The unfree packages (`claude-code`, `github-copilot-cli`, the Claude VSCodium extension, `revpdf`) are not on cache.nixos.org; Nix packages them locally from the upstream release files during the install.
 
 ## Login
 
@@ -65,7 +67,7 @@ Old generations are removed weekly (`programs.nh.clean`, keeps 5 and 14 days). C
 
 ### Notes for a future application or package
 
-- A nixpkgs application (free or unfree) goes into `common/apps.nix` — the one spot for applications. Unfree ones additionally need their pname in the allowlist in `common/base.nix` (currently empty).
+- A nixpkgs application (free or unfree) goes into `common/apps.nix` — the one spot for applications. Unfree ones additionally need their pname in the allowlist in `common/base.nix`.
 - A own package goes to `pkgs/<name>/package.nix`, is registered in `pkgs/default.nix` and referenced from `common/apps.nix`; unfree: also allowlist.
 - A new user-facing command, alias or script: `docs/tips/commands.md`.
 - Qt apps inherit the Noctalia palette from the qt5ct/qt6ct setup in `nixos-mango/`. Double Commander from nixpkgs is Qt5, so it is themed through qt5ct even though `QT_QPA_PLATFORMTHEME` is set to `qt6ct`.

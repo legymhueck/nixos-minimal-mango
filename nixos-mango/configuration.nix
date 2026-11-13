@@ -16,7 +16,7 @@ in
   imports = [
     inputs.mango.nixosModules.mango
     ../common/base.nix
-    ../common/hardware-intel-laptop.nix
+    ../common/hardware-portable.nix
   ];
 
   # --- desktop ---

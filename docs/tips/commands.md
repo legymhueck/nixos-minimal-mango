@@ -31,11 +31,20 @@ umount-drive                   # unmount ~/mount and close the "micleh" LUKS map
 partuuid                       # list partitions by PARTUUID
 ```
 
-## Snapshots and Btrfs
+## Coding agents and editor
 
 ```sh
-snapper-delete --dry-run       # show which snapper snapshots would be deleted
-snapper-delete                 # delete them (asks per config; -y for no questions)
+claude                         # Claude Code (first start: log in)
+copilot                        # GitHub Copilot CLI (needs `gh auth login` / Copilot plan)
+opencode                       # opencode
+codium .                       # VSCodium in the current folder
+gh auth login                  # GitHub login, also for git push over HTTPS
+direnv allow                   # load a repo's .envrc (`use flake`) on cd
+```
+
+## Btrfs
+
+```sh
 bfree                          # Btrfs space usage
 bscrub && bscrubStatus         # check the file system for errors
 ```

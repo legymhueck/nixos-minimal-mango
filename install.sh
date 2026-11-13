@@ -3,7 +3,10 @@
 #
 # Run as root on the live ISO, from a complete repository checkout (it is copied, with .git, to ~/nixos):
 #
-#   sudo ./install.sh /dev/nvme0n1     # MangoWM + Noctalia (the only profile)
+#   sudo ./install.sh /dev/sdb         # the target USB stick (MangoWM + Noctalia, the only profile)
+#
+# The result boots on any x86_64 UEFI PC (common/hardware-portable.nix) and
+# never writes boot entries into the PC's firmware.
 #
 # This WIPES the whole disk. You are asked once for a password. It is used for
 # the LUKS passphrase and the login of user "m" (root login is disabled).
@@ -37,10 +40,10 @@ trap cleanup EXIT
 
 # ---------- preflight (nothing is touched yet) ----------
 [[ $EUID -eq 0 ]] || die "run as root (sudo -i first)"
-[[ -n $DISK && -b $DISK ]] || die "usage: $0 <disk>   e.g. $0 /dev/nvme0n1"
+[[ -n $DISK && -b $DISK ]] || die "usage: $0 <disk>   e.g. $0 /dev/sdb"
 [[ -d /sys/firmware/efi ]] || die "not booted in UEFI mode"
 for f in flake.nix flake.lock common/base.nix common/vars.nix common/apps.nix common/home.nix common/firefox.nix \
-  nixos-mango/configuration.nix nixos-mango/home.nix nixos-mango/desktop.nix; do
+  common/hardware-portable.nix common/scripts.nix nixos-mango/configuration.nix nixos-mango/home.nix nixos-mango/desktop.nix; do
   [[ -f $REPO_ROOT/$f ]] || die "missing $REPO_ROOT/$f"
 done
 for d in dotfiles pkgs scripts; do
@@ -131,7 +134,8 @@ mkdir -p /mnt/{boot,home,nix,var/log}
 mount -o "$O,subvol=@home" "$M" /mnt/home
 mount -o "$O,subvol=@nix"  "$M" /mnt/nix
 mount -o "$O,subvol=@log"  "$M" /mnt/var/log
-mount -o umask=0077 /dev/disk/by-label/BOOT /mnt/boot
+# By device, not by label: a disk of the host PC may also be labeled BOOT.
+mount -o umask=0077 "$P_ESP" /mnt/boot
 findmnt -R /mnt
 
 # The live ISO keeps its build directories in RAM; a local compile can freeze
@@ -205,7 +209,8 @@ NEXT="Update the configuration later with: nh os switch   (alias: rebuild)"
 
 cat <<EOF
 
-==> Done. Remove the USB stick and run: reboot
+==> Done. Remove the installer stick (keep the new one plugged in) and run: reboot
+    Pick the new stick in the PC's boot menu (often F12, F8 or Esc).
 
 At boot you type the LUKS passphrase once; the desktop then starts without a
 second login prompt (Mango). The password you entered is also the password of

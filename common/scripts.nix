@@ -17,10 +17,6 @@ in
       cryptsetup
       util-linux
     ])
-    (mkScript "snapper-delete" [
-      gawk
-      snapper
-    ])
     (mkScript "ssh-permissions" [ findutils ])
     (mkScript "update-check" [
       curl
