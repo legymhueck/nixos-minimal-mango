@@ -41,6 +41,8 @@
     nodejs # npx for MCP servers the agents start
 
     # --- toolchain for the repo unterricht (its AGENTS.md and _tools/) ---
+    lazygit # git UI, also inside Neovim (<leader>gg)
+    marp-cli # Marp slides: preview and PDF/HTML/PPTX export
     pandoc # html-bauen.sh, pdf-bauen.sh
     typst # print layout, also docs in the repo nixos
     tinymist # Typst language server

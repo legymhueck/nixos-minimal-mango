@@ -13,6 +13,7 @@ let
   # the publisher spelled as in the marketplace.
   allowedUnfreePkgs = [
     "claude-code"
+    "copilot-language-server"
     "github-copilot-cli"
     "vscode-extension-anthropic-claude-code"
   ];

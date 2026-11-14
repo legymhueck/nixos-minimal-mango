@@ -7,6 +7,7 @@
   imports = [
     ./firefox.nix
     ./apps.nix
+    ./neovim.nix
     ./scripts.nix
   ];
 
@@ -27,7 +28,7 @@
   # --- shell ---
   home.sessionPath = [ "$HOME/.local/bin" ];
   home.sessionVariables = {
-    EDITOR = "vim";
+    EDITOR = "nvim";
   };
 
   programs.bash = {

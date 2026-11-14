@@ -42,7 +42,7 @@ trap cleanup EXIT
 [[ $EUID -eq 0 ]] || die "run as root (sudo -i first)"
 [[ -n $DISK && -b $DISK ]] || die "usage: $0 <disk>   e.g. $0 /dev/sdb"
 [[ -d /sys/firmware/efi ]] || die "not booted in UEFI mode"
-for f in flake.nix flake.lock common/base.nix common/vars.nix common/apps.nix common/home.nix common/firefox.nix \
+for f in flake.nix flake.lock common/base.nix common/vars.nix common/apps.nix common/home.nix common/neovim.nix common/firefox.nix \
   common/hardware-portable.nix common/scripts.nix nixos-mango/configuration.nix nixos-mango/home.nix nixos-mango/desktop.nix; do
   [[ -f $REPO_ROOT/$f ]] || die "missing $REPO_ROOT/$f"
 done
