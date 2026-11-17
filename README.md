@@ -6,7 +6,7 @@ Personal, reproducible NixOS workstation configuration: a minimal MangoWM deskto
 
 | Path | Purpose |
 | --- | --- |
-| `flake.nix`, `flake.lock` | Single entry point, all inputs pinned. `nixosConfigurations.nixbox` exists only where `nixos-mango/hardware-configuration.nix` exists (the `-eval` twin with a `/dev/null` stand-in is for CI and `nix eval`, never deploy). Also exports a dev shell with the linters (`nix develop`) and the formatter |
+| `flake.nix`, `flake.lock` | Single entry point, all inputs pinned. `nixosConfigurations.nixstick` exists only where `nixos-mango/hardware-configuration.nix` exists (the `-eval` twin with a `/dev/null` stand-in is for CI and `nix eval`, never deploy). Also exports a dev shell with the linters (`nix develop`) and the formatter |
 | `common/` | `vars.nix` (user, host, Btrfs mounts), `base.nix` (system + essential CLI tools + unfree allowlist), `hardware-portable.nix` (generic Intel/AMD support so the stick boots on any x86 PC), `home.nix` (shell, git, starship, ...), `apps.nix` (the single spot for applications, free and unfree), `neovim.nix` (Neovim with plugins and language servers; Lua config in `dotfiles/nvim/lua/m`), `firefox.nix` (browser), `scripts.nix` |
 | `nixos-mango/` | MangoWM + Noctalia: `configuration.nix` (Mango system side), `desktop.nix` (Mango/Noctalia Home Manager), `home.nix` (qt5ct/qt6ct theming, MIME defaults), `hardware-configuration.nix` |
 | `wallpapers/` | Noctalia wallpaper source (`desktop.nix` points to `~/nixos/wallpapers`); `minimal-dark.png` is self-generated, no license restrictions |
@@ -34,7 +34,7 @@ The script copies the complete checkout (with `.git`) to `~/nixos`, so it is a w
 
 The script asks for **one password**. It becomes the LUKS passphrase and the password of `m`. Root login is disabled (use `sudo`).
 
-Almost everything comes from the binary caches — the free applications and system packages from cache.nixos.org, the Noctalia shell from its Cachix cache. The unfree packages (`claude-code`, `github-copilot-cli`, `copilot-language-server`, the Claude VSCodium extension) are not on cache.nixos.org; Nix packages them locally from the upstream release files during the install (download and wrap, no compiling). The Mango compositor itself is built from its flake input (a small C build, about a minute). Keep it that way: nothing that compiles for long belongs on the stick — check with `nix build --dry-run .#nixosConfigurations.nixbox-eval.config.system.build.toplevel` ("will be built" vs. "will be fetched").
+Almost everything comes from the binary caches — the free applications and system packages from cache.nixos.org, the Noctalia shell from its Cachix cache. The unfree packages (`claude-code`, `github-copilot-cli`, `copilot-language-server`, the Claude VSCodium extension) are not on cache.nixos.org; Nix packages them locally from the upstream release files during the install (download and wrap, no compiling). The Mango compositor itself is built from its flake input (a small C build, about a minute). Keep it that way: nothing that compiles for long belongs on the stick — check with `nix build --dry-run .#nixosConfigurations.nixstick-eval.config.system.build.toplevel` ("will be built" vs. "will be fetched").
 
 ## Login
 
@@ -61,7 +61,7 @@ nh os switch --update   # alias: update. Update all inputs, then apply
 nh os test              # activate without a boot entry
 ```
 
-Old generations are removed weekly (`programs.nh.clean`, keeps 5 and 14 days). Check with `nix flake check` (lint and evaluation of all outputs) and `nix eval .#nixosConfigurations.nixbox-eval.config.system.build.toplevel.drvPath` before pushing; CI runs the same. Format with `nix fmt`. `nix develop` gives a shell with statix, deadnix, nixfmt, shellcheck and shfmt.
+Old generations are removed weekly (`programs.nh.clean`, keeps 5 and 14 days). Check with `nix flake check` (lint and evaluation of all outputs) and `nix eval .#nixosConfigurations.nixstick-eval.config.system.build.toplevel.drvPath` before pushing; CI runs the same. Format with `nix fmt`. `nix develop` gives a shell with statix, deadnix, nixfmt, shellcheck and shfmt.
 
 ### Notes for a future application or package
 
@@ -78,6 +78,7 @@ Old generations are removed weekly (`programs.nh.clean`, keeps 5 and 14 days). C
 
 ## Notes
 
+- Hostname `nixstick` (until 2026-11-17 `nixbox`, the same as the main system). A stick installed before that: `cd ~/nixos && git pull && nh os switch -H nixstick` once (plain `rebuild` looks up the old hostname), then remove its old device in the Tailscale admin console.
 - Starting a fresh repo from these files (new `.git`): `git init && git add -A && git commit -m "Initial import"`. Flakes read working-tree files through git, so the files must be tracked before `nix flake check` / `nh os switch` work.
 - `flake.lock` may contain entries for inputs no longer in `flake.nix` (e.g. after removing a local package); they are ignored and pruned on the next `nix flake update`.
 - `nixos-mango/hardware-configuration.nix` in the repo belongs to the current machine; the installer replaces it for a new one. Never deploy without the generated module of the target.

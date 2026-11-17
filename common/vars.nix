@@ -3,7 +3,7 @@
 # nix-instantiate). Plain data: no arguments.
 {
   user = "m";
-  host = "nixbox";
+  host = "nixstick";
   # Btrfs subvolume mount points (@, @home, @nix, @log, created by install.sh).
   btrfsMounts = [
     "/"
