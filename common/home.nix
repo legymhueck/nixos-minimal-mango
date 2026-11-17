@@ -19,6 +19,10 @@
 
   fonts.fontconfig.enable = true;
 
+  # No `man home-configuration.nix`: the options manpage is built locally on
+  # every rebuild (never cached). The options are on the Home Manager website.
+  manual.manpages.enable = false;
+
   # The defaults are ~/Desktop, ~/Documents, ..., ~/Projects.
   xdg.userDirs = {
     enable = true;

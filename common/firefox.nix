@@ -28,6 +28,13 @@
         "sidebar.revamp" = true;
         "sidebar.verticalTabs" = true;
 
+        # Spare the flash: the browser is the stick's biggest writer. Cache in
+        # RAM only (empty after a restart, faster than a stick on USB 2 anyway),
+        # session saved every minute instead of every 15 s.
+        "browser.cache.disk.enable" = false;
+        "browser.cache.memory.enable" = true;
+        "browser.sessionstore.interval" = 60000;
+
         "browser.startup.page" = 1;
         "browser.newtabpage.enabled" = false;
       };
