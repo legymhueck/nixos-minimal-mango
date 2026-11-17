@@ -115,12 +115,37 @@ installing them by hand, so they survive a reinstall.
   to be set up again after a reinstall.
 - **Updates:** `update` (all inputs) or `rebuild` (only apply changes). Claude
   Code, the Copilot CLI and the Claude VSCodium extension are packaged locally on each update, which
-  takes longer than the cached packages. Old generations are removed weekly.
+  takes longer than the cached packages. opencode is not in the binary cache
+  either: after an update that changes it, it is built on the stick (about
+  4 minutes: download plus bundling, nothing is compiled). Old generations are
+  removed weekly.
+- **Firefox keeps its cache in RAM** (to spare the flash), so pages load from
+  the network again after a restart. The session is saved every minute: after a
+  crash, the last minute of tabs may be missing.
 - **Space:** check with `bfree`. The system needs about 15-20 GB; the rest is
   yours.
 - **Battery limits** (ThinkPads) are off by default; enable them with
   `nixbox.batteryThresholds` in `nixos-mango/configuration.nix` if this stick
   mostly runs on one laptop.
+
+## Sticks installed before 2026-11-17
+
+The hostname changed from `nixbox` (the same as the main system) to `nixstick`.
+Once, on the stick:
+
+```sh
+cd ~/nixos && git pull && nh os switch -H nixstick
+```
+
+Plain `rebuild` does not work for this step: it looks up the old hostname.
+Afterwards `rebuild` and `update` work as usual. The same run also brings the
+Firefox cache in RAM and builds opencode (a few minutes); log in to opencode
+once with `opencode auth login`.
+
+Tailscale: the stick keeps its Tailscale login, so its device normally just
+shows the new name. Check `tailscale status` and the admin console; remove an
+old `nixbox`/`nixbox-1` entry only if it is a second, offline device, never
+the stick itself.
 
 ## If it does not boot
 

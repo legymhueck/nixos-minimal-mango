@@ -78,7 +78,7 @@ Old generations are removed weekly (`programs.nh.clean`, keeps 5 and 14 days). C
 
 ## Notes
 
-- Hostname `nixstick` (until 2026-11-17 `nixbox`, the same as the main system). A stick installed before that: `cd ~/nixos && git pull && nh os switch -H nixstick` once (plain `rebuild` looks up the old hostname), then remove its old device in the Tailscale admin console.
+- Hostname `nixstick` (until 2026-11-17 `nixbox`, the same as the main system). A stick installed before that: `cd ~/nixos && git pull && nh os switch -H nixstick` once (plain `rebuild` looks up the old hostname), see `docs/tips/after-install.md` ("Sticks installed before 2026-11-17"; in Tailscale remove an old entry only if it is a second, offline device).
 - Starting a fresh repo from these files (new `.git`): `git init && git add -A && git commit -m "Initial import"`. Flakes read working-tree files through git, so the files must be tracked before `nix flake check` / `nh os switch` work.
 - `flake.lock` may contain entries for inputs no longer in `flake.nix` (e.g. after removing a local package); they are ignored and pruned on the next `nix flake update`.
 - `nixos-mango/hardware-configuration.nix` in the repo belongs to the current machine; the installer replaces it for a new one. Never deploy without the generated module of the target.
