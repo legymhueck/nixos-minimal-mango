@@ -71,9 +71,10 @@
 
   # VSCodium (free build of VS Code) with the extensions for both repos; only
   # the Claude extension is unfree.
-  programs.vscode = {
+  # programs.vscodium (not programs.vscode with package = vscodium): only it
+  # writes settings and extensions to VSCodium's own paths (~/.vscode-oss).
+  programs.vscodium = {
     enable = true;
-    package = pkgs.vscodium;
     profiles.default.extensions = with pkgs.vscode-extensions; [
       anthropic.claude-code
       bbenoist.nix

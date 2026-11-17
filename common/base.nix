@@ -95,7 +95,7 @@ in
 
     # --- less flash wear: logs and /tmp in RAM ---
     # The journal is lost at reboot; `journalctl -b` still shows the current boot.
-    services.journald.storage = "volatile"; # capped at 10 % of /run by default
+    services.journald.settings.Journal.Storage = "volatile"; # capped at 10 % of /run by default
     boot.tmp.useTmpfs = true;
     # Nix builds stay on disk, a large build would not fit into a RAM /tmp.
     systemd.services.nix-daemon.environment.TMPDIR = "/var/tmp";

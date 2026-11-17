@@ -8,7 +8,7 @@ Minimal NixOS desktop (MangoWM + Noctalia) on a USB stick that boots on any x86_
 - Module arguments `inputs` and `vars` (`common/vars.nix`) come from `specialArgs`/`extraSpecialArgs`; never `import` vars.nix in modules.
 - `common/` = system + Home Manager base; `nixos-mango/` = desktop specifics.
 - One `pkgs` everywhere (`useGlobalPkgs`); the overlay for it lives in `common/base.nix`.
-- One spot for applications: free and unfree nixpkgs applications go into `common/apps.nix`; unfree ones also need a pname entry in the allowlist in `common/base.nix` (claude-code, github-copilot-cli, copilot-language-server, the Claude VSCodium extension). The browser itself is `programs.firefox` in `common/firefox.nix`; ungoogled-chromium in `apps.nix` exists only for the Claude browser agent. foot is the only terminal; the editors are VSCodium via `programs.vscode` and Neovim via `programs.neovim` in `common/neovim.nix` (plugins from nixpkgs, Lua config in `dotfiles/nvim/lua/m`, linked out of the store so edits apply without a rebuild).
+- One spot for applications: free and unfree nixpkgs applications go into `common/apps.nix`; unfree ones also need a pname entry in the allowlist in `common/base.nix` (claude-code, github-copilot-cli, copilot-language-server, the Claude VSCodium extension). The browser itself is `programs.firefox` in `common/firefox.nix`; ungoogled-chromium in `apps.nix` exists only for the Claude browser agent. foot is the only terminal; the editors are VSCodium via `programs.vscodium` (never `programs.vscode` with `package = vscodium`: that writes to VS Code's paths, VSCodium would not see the extensions) and Neovim via `programs.neovim` in `common/neovim.nix` (plugins from nixpkgs, Lua config in `dotfiles/nvim/lua/m`, linked out of the store so edits apply without a rebuild).
 - One spot for own flakes: `pkgs/default.nix` (`callPackage` style) — no active entries (the USB system installs from the binary cache only; reactivating hylki or revpdf needs their flake inputs back, see the comment there); e.g. Double Commander instead comes from nixpkgs itself (`common/apps.nix`, the configuration in `dotfiles/`).
 - Theming: Noctalia generates the GTK/Qt files (`theme.templates` in `nixos-mango/desktop.nix`). `nixos-mango/home.nix` points both qt5ct and qt6ct at the generated `colors/noctalia.conf`; `QT_QPA_PLATFORMTHEME=qt6ct` (`nixos-mango/configuration.nix`) covers both toolkits because qt5ct's plugin also registers the `qt6ct` key. Double Commander from nixpkgs is the **Qt5** build, so it needs qt5ct — installing only qt6ct leaves it on the default light palette.
 - No install stages: the installer sets up everything in one run (`profile` = `mango`, written by install.sh).
@@ -46,3 +46,15 @@ Flakes only see git-tracked files: `git add` new files before evaluating. Users 
 - New script: `scripts/<name>.sh` plus a `mkScript` line with its runtime dependencies in `common/scripts.nix`.
 - New user-facing command, alias or script: add it to `docs/tips/commands.md`.
 - Firefox: `profiles.default.settings` plus `policies` in `common/firefox.nix`.
+
+## Relation to the main repo
+
+- Sister repo of `~/nixos` (GitHub `legymhueck/nixos`, the full system on the internal SSD, host `nixbox` too). This one is the minimal variant for a USB stick: only cached packages, generic hardware, flash-friendly settings. Ideas are often ported from there; check the invariants above before copying (no snapper, no `nix.optimise`, no `canTouchEfiVariables`, no install stages, no local builds).
+- Differences on purpose: docs here are English Markdown (`docs/tips/`), not German Typst; applications live in one file (`common/apps.nix`), not in four stage lists; `pkgs/` entries are kept but inactive.
+- The main repo also enforces `shfmt -i 2 -ci` in its lint check and evaluates the flake in `install.sh` instead of a file list; both could be ported here.
+
+## Status (2026-11-17)
+
+- CI was red since 2026-11-13: `3b9f7f8` failed on megasync (unfree, not allowlisted; removed in `bbdf8c3`), `8a9c1b3` on the unformatted `nixos-mango/hardware-configuration.nix`. Fixed together with two evaluation warnings (`services.journald.storage` renamed to `services.journald.settings.Journal.Storage`; `programs.vscode` with VSCodium replaced by `programs.vscodium`).
+- `flake.lock` dates from 2026-10-30/31 (nixpkgs, mango) and has not been updated since. Before the next install on a stick: `nix flake update`, `nix flake check`, and the dry-run from README.md ("will be built" must list only Mango and the unfree wrappers).
+- Check CI after each push: `gh run list --limit 5`, failures with `gh run view <id> --log-failed`.
