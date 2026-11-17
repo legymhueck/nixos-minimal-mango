@@ -21,9 +21,6 @@
       url = "github:noctalia-dev/community-plugins";
       flake = false;
     };
-    # No local package sources here: every entry in ./pkgs/default.nix is
-    # commented out (slim USB system, binary cache only). Reactivating hylki
-    # or revpdf needs the inputs hylki-src / revpdf-release back here first.
   };
 
   outputs =
@@ -38,10 +35,7 @@
       vars = import ./common/vars.nix;
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-      variant = "mango";
-      nixName = "${vars.host}-${variant}";
-
-      hardwareFile = ./. + "/nixos-${variant}/hardware-configuration.nix";
+      hardwareFile = ./nixos-mango/hardware-configuration.nix;
       hasHardware = builtins.pathExists hardwareFile;
 
       # Only for the `-eval` output: stands in for the generated hardware
@@ -56,13 +50,6 @@
         boot.initrd.luks.devices.cryptroot.device = "/dev/null";
       };
 
-      readFileOr =
-        file: default: if builtins.pathExists file then lib.trim (builtins.readFile file) else default;
-
-      # Which host name the alias (`nh os switch`) builds. The installer
-      # writes the profile to ./profile; default is mango.
-      profile = readFileOr ./profile "mango";
-
       mkSystem =
         {
           evalOnly ? false,
@@ -71,7 +58,7 @@
           inherit system;
           specialArgs = { inherit inputs vars; };
           modules = [
-            (./. + "/nixos-${variant}/configuration.nix")
+            ./nixos-mango/configuration.nix
             (if evalOnly then evaluationHardware else hardwareFile)
             home-manager.nixosModules.home-manager
             {
@@ -80,26 +67,12 @@
                 useUserPackages = true;
                 backupFileExtension = "bak";
                 extraSpecialArgs = { inherit inputs vars; };
-                users.${vars.user} = ./. + "/nixos-${variant}/home.nix";
+                users.${vars.user} = ./nixos-mango/home.nix;
               };
             }
           ];
         };
 
-      # Names of the local packages from ./pkgs. The overlay itself is not
-      # evaluated here: the system package set gets it via `nixpkgs.overlays`
-      # (common/base.nix); only the attribute names of its result are forced,
-      # the entry values stay thunks. Dummy arguments make this work with the
-      # `{ inputs }: final: _prev:` shape in pkgs/default.nix: the outer
-      # attribute set accepts `inputs`, the two overlay levels accept anything.
-      localPackages =
-        let
-          dummy = {
-            inputs = null;
-          };
-          applyArgs = f: if builtins.isFunction f then applyArgs (f dummy) else f;
-        in
-        builtins.attrNames (applyArgs (import ./pkgs));
     in
     {
       formatter.${system} = pkgs.nixfmt-tree;
@@ -107,23 +80,12 @@
       nixosConfigurations =
         # The real configuration exists only where the generated hardware
         # module is present (the committed one belongs to the current machine).
-        (lib.optionalAttrs hasHardware { ${nixName} = mkSystem { }; })
+        # `nixos-rebuild --flake .` / `nh os switch` look up the hostname.
+        lib.optionalAttrs hasHardware { ${vars.host} = mkSystem { }; }
         # Evaluation-only twin for CI and `nix eval`; never deploy this.
         // {
-          "${nixName}-eval" = mkSystem { evalOnly = true; };
-        }
-        # `nixos-rebuild --flake .` / `nh os switch` look up the hostname.
-        // lib.optionalAttrs (hasHardware && profile == variant) {
-          ${vars.host} = self.nixosConfigurations.${nixName};
+          "${vars.host}-eval" = mkSystem { evalOnly = true; };
         };
-
-      # Local packages built with the system's package set (overlay), e.g.
-      # `nix build .#<pkg>` — none at the moment, see pkgs/default.nix.
-      packages.${system} =
-        let
-          systemPkgs = self.nixosConfigurations."${nixName}-eval".pkgs;
-        in
-        lib.genAttrs localPackages (name: systemPkgs.${name});
 
       # Tools for working on this repository: `nix develop`.
       devShells.${system}.default = pkgs.mkShellNoCC {
@@ -142,6 +104,7 @@
             nativeBuildInputs = with pkgs; [
               deadnix
               shellcheck
+              shfmt
               statix
             ];
           }
@@ -149,7 +112,8 @@
             cd ${self}
             statix check .
             deadnix --fail --exclude "**/hardware-configuration.nix" .
-            shellcheck install.sh scripts/*.sh pkgs/*/*.sh
+            shellcheck install.sh scripts/*.sh
+            shfmt -d -i 2 -ci install.sh scripts/*.sh
             touch $out
           '';
     };

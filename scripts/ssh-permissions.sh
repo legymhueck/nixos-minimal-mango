@@ -4,7 +4,10 @@
 set -euo pipefail
 
 dir="${1:-$HOME/.ssh}"
-[[ -d $dir ]] || { echo "No such directory: $dir" >&2; exit 1; }
+[[ -d $dir ]] || {
+  echo "No such directory: $dir" >&2
+  exit 1
+}
 
 chmod 700 "$dir"
 find "$dir" -mindepth 1 -type d -exec chmod 700 {} +

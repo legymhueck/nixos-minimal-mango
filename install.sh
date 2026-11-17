@@ -3,7 +3,7 @@
 #
 # Run as root on the live ISO, from a complete repository checkout (it is copied, with .git, to ~/nixos):
 #
-#   sudo ./install.sh /dev/sdb         # the target USB stick (MangoWM + Noctalia, the only profile)
+#   sudo ./install.sh /dev/sdb         # the target USB stick (MangoWM + Noctalia)
 #
 # The result boots on any x86_64 UEFI PC (common/hardware-portable.nix) and
 # never writes boot entries into the PC's firmware.
@@ -22,8 +22,14 @@ CFG=/mnt/etc/nixos # temporary location during the install, moved to ~/nixos at 
 TMP_SWAP=/mnt/.installer-swap
 Z=""
 
-die() { echo "ERROR: $*" >&2; exit 1; }
-step() { echo; echo "==> $*"; }
+die() {
+  echo "ERROR: $*" >&2
+  exit 1
+}
+step() {
+  echo
+  echo "==> $*"
+}
 
 # Remove the temporary swap file and zram again, whatever happens.
 cleanup() {
@@ -42,13 +48,6 @@ trap cleanup EXIT
 [[ $EUID -eq 0 ]] || die "run as root (sudo -i first)"
 [[ -n $DISK && -b $DISK ]] || die "usage: $0 <disk>   e.g. $0 /dev/sdb"
 [[ -d /sys/firmware/efi ]] || die "not booted in UEFI mode"
-for f in flake.nix flake.lock common/base.nix common/vars.nix common/apps.nix common/home.nix common/neovim.nix common/firefox.nix \
-  common/hardware-portable.nix common/scripts.nix nixos-mango/configuration.nix nixos-mango/home.nix nixos-mango/desktop.nix; do
-  [[ -f $REPO_ROOT/$f ]] || die "missing $REPO_ROOT/$f"
-done
-for d in dotfiles pkgs scripts; do
-  [[ -d $REPO_ROOT/$d ]] || die "missing $REPO_ROOT/$d (referenced by the flake, the build would fail)"
-done
 # Host and user come from common/vars.nix, the single source for all modules.
 vars_get() { nix-instantiate --eval -E "(import (/. + \"$REPO_ROOT/common/vars.nix\")).$1" | tr -d '"'; }
 HOST=$(vars_get host)
@@ -58,21 +57,44 @@ if lsblk -nro MOUNTPOINTS "$DISK" | grep -q .; then
   die "$DISK has mounted partitions (is it the installer USB stick?). Unmount them or pick another disk."
 fi
 curl --fail --silent --show-error --head --connect-timeout 5 --max-time 10 \
-  https://cache.nixos.org/nix-cache-info >/dev/null \
-  || die "cannot reach the Nix cache over HTTPS (connect with nmtui first)"
+  https://cache.nixos.org/nix-cache-info >/dev/null ||
+  die "cannot reach the Nix cache over HTTPS (connect with nmtui first)"
+
+# ---------- nix settings for the installer ----------
+step "Enabling flakes"
+mkdir -p ~/.config/nix
+{
+  echo "experimental-features = nix-command flakes"
+  echo "extra-substituters = https://noctalia.cachix.org"
+  echo "extra-trusted-public-keys = noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+} >~/.config/nix/nix.conf
+unset NIX_CONFIG
+nix config show | grep -q flakes || die "flakes not enabled in nix config"
+
+# Evaluate the configuration before anything is wiped: catches missing or
+# broken files in the checkout. path: sees every file, tracked or not, just
+# like the copy that is installed later. The -eval twin needs no hardware module.
+step "Checking the configuration"
+nix eval --raw "path:$REPO_ROOT#nixosConfigurations.$HOST-eval.config.system.build.toplevel.drvPath" >/dev/null ||
+  die "the configuration in $REPO_ROOT does not evaluate (incomplete checkout?)"
 
 lsblk "$DISK"
 if [[ ${YES:-0} != 1 ]]; then
-  read -rp "Wipe ALL of $DISK and install '$HOST' (Mango profile)? Type YES: " ans
+  read -rp "Wipe ALL of $DISK and install '$HOST'? Type YES: " ans
   [[ $ans == YES ]] || die "aborted"
 fi
 
 # ---------- password ----------
 if [[ -z $PW ]]; then
   while :; do
-    read -rsp "Password for LUKS and user '$USER_NAME': " PW; echo
-    [[ -n $PW ]] || { echo "must not be empty"; continue; }
-    read -rsp "Repeat: " PW2; echo
+    read -rsp "Password for LUKS and user '$USER_NAME': " PW
+    echo
+    [[ -n $PW ]] || {
+      echo "must not be empty"
+      continue
+    }
+    read -rsp "Repeat: " PW2
+    echo
     [[ $PW == "$PW2" ]] && break
     echo "does not match, try again"
   done
@@ -86,17 +108,6 @@ step "Cleaning up previous mounts"
 swapoff -a 2>/dev/null || true
 umount -R /mnt 2>/dev/null || true
 cryptsetup close cryptroot 2>/dev/null || true
-
-# ---------- nix settings for the installer ----------
-step "Enabling flakes"
-mkdir -p ~/.config/nix
-{
-  echo "experimental-features = nix-command flakes"
-  echo "extra-substituters = https://noctalia.cachix.org"
-  echo "extra-trusted-public-keys = noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
-} > ~/.config/nix/nix.conf
-unset NIX_CONFIG
-nix config show | grep -q flakes || die "flakes not enabled in nix config"
 
 # ---------- partition, encrypt, format ----------
 step "Partitioning $DISK"
@@ -132,8 +143,8 @@ O=compress=zstd,noatime
 mount -o "$O,subvol=@" "$M" /mnt
 mkdir -p /mnt/{boot,home,nix,var/log}
 mount -o "$O,subvol=@home" "$M" /mnt/home
-mount -o "$O,subvol=@nix"  "$M" /mnt/nix
-mount -o "$O,subvol=@log"  "$M" /mnt/var/log
+mount -o "$O,subvol=@nix" "$M" /mnt/nix
+mount -o "$O,subvol=@log" "$M" /mnt/var/log
 # By device, not by label: a disk of the host PC may also be labeled BOOT.
 mount -o umask=0077 "$P_ESP" /mnt/boot
 findmnt -R /mnt
@@ -153,8 +164,8 @@ swapon --show
 step "Generating hardware config and installing the flake"
 nixos-generate-config --root /mnt
 GEN_SV=$(sed -n 's/.*system\.stateVersion = "\([^"]*\)".*/\1/p' "$CFG/configuration.nix" | head -1)
-grep -q cryptroot "$CFG/hardware-configuration.nix" \
-  || die "hardware-configuration.nix has no luks device 'cryptroot'"
+grep -q cryptroot "$CFG/hardware-configuration.nix" ||
+  die "hardware-configuration.nix has no luks device 'cryptroot'"
 
 # nixos-generate-config records the temporary swap file as a swap device; the
 # installed system uses zram only, so drop it again.
@@ -167,9 +178,7 @@ rm -f -- "$CFG/configuration.nix"
 # Copy the complete checkout (including .git, README, docs, wallpapers, ...) so
 # ~/nixos is a working clone and nothing needs to be kept in sync by hand.
 cp -a --no-preserve=ownership "$REPO_ROOT/." "$CFG/"
-printf '%s\n' "mango" > "$CFG/profile"
-# Only the chosen variant gets the generated hardware config; a foreign one from
-# the repo must not stay behind.
+# The generated hardware config replaces the one from the repo (another machine).
 rm -f -- "$CFG/nixos-mango/hardware-configuration.nix"
 mv "$HW_TMP" "$CFG/nixos-mango/hardware-configuration.nix"
 
@@ -180,14 +189,14 @@ fi
 
 cd "$CFG"
 [[ -d .git ]] || git init -q # a zip download has no history
-git add -A # flakes ignore untracked files
+git add -A                   # flakes ignore untracked files
 git -c user.name="Installer" -c user.email="installer@localhost" commit -q -m "Installation: generated hardware configuration"
 
 # ---------- install ----------
 step "nixos-install (this takes a while)"
 swapon --show
 MAX_JOBS="${MAX_JOBS:-1}"
-nixos-install --flake "$CFG#nixbox-mango" --no-root-passwd --max-jobs "$MAX_JOBS"
+nixos-install --flake "$CFG#$HOST" --no-root-passwd --max-jobs "$MAX_JOBS"
 
 step "Setting password for $USER_NAME (root login is disabled in the config)"
 printf '%s\n' "$USER_NAME:$PW" | nixos-enter --root /mnt -c chpasswd

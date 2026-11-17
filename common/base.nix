@@ -37,9 +37,6 @@ in
     # Keep an explicit unfree allowlist instead of allowing the entire package
     # set (see allowedUnfreePkgs above).
     nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) allowedUnfreePkgs;
-    # Own packages from ../pkgs (none active). Also visible to Home Manager
-    # because of home-manager.useGlobalPkgs.
-    nixpkgs.overlays = [ (import ../pkgs) ];
     # nh: nicer rebuilds (`nh os switch`) and the weekly garbage collection
     # (replaces nix.gc, they must not both be enabled).
     programs.nh = {
@@ -80,7 +77,7 @@ in
     services.btrfs.autoScrub.enable = true;
     services.fstrim.enable = true;
 
-    # No swap file: zram is enough on this machine and keeps snapshots simple.
+    # No swap file: zram is enough and spares the flash.
     # (The installer only uses a temporary swap file while it builds.)
     # No hibernation without disk swap.
     zramSwap = {
@@ -104,6 +101,10 @@ in
     networking.hostName = vars.host;
     networking.networkmanager.enable = true;
     time.timeZone = "Europe/Berlin";
+    # The stick boots almost only on Windows PCs whose clock setting cannot be
+    # changed; Windows reads the hardware clock as local time. With UTC here,
+    # NixOS would leave those PCs' clocks off by one or two hours.
+    time.hardwareClockInLocalTime = true;
     i18n.defaultLocale = "en_US.UTF-8";
     i18n.extraLocaleSettings = lib.genAttrs [
       "LC_ADDRESS"
