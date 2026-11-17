@@ -56,5 +56,5 @@ Flakes only see git-tracked files: `git add` new files before evaluating. Users 
 ## Status (2026-11-17)
 
 - CI was red since 2026-11-13: `3b9f7f8` failed on megasync (unfree, not allowlisted; removed in `bbdf8c3`), `8a9c1b3` on the unformatted `nixos-mango/hardware-configuration.nix`. Fixed together with two evaluation warnings (`services.journald.storage` renamed to `services.journald.settings.Journal.Storage`; `programs.vscode` with VSCodium replaced by `programs.vscodium`).
-- `flake.lock` dates from 2026-10-30/31 (nixpkgs, mango) and has not been updated since. Before the next install on a stick: `nix flake update`, `nix flake check`, and the dry-run from README.md ("will be built" must list only Mango and the unfree wrappers).
+- `flake.lock` updated on 2026-11-17 (nixpkgs 2026-11-13, same revision as the main repo `~/nixos`). `nix flake check` passed, no warnings; the dry-run builds only configuration files, wrappers, initrd and kernel modules locally (plus Mango and the unfree wrappers on a fresh stick).
 - Check CI after each push: `gh run list --limit 5`, failures with `gh run view <id> --log-failed`.
